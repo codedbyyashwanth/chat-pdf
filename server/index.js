@@ -103,7 +103,7 @@ app.post('/api/ask', async (req, res) => {
 
         // Extract and format context
         const context = queryResult.matches
-            .filter(match => match.score >= 0.7) // Filter by confidence score
+            .filter(match => match.score >= 0.3) // Filter by confidence score
             .map(match => match.metadata.text)
             .join('\n\n');
 
@@ -119,8 +119,7 @@ app.post('/api/ask', async (req, res) => {
             model: "gpt-3.5-turbo",
             messages: [{
                 role: "system",
-                content: `Answer the question based only on the context below. 
-                If you don't know the answer, say "I don't know".
+                content: `Answer the question. 
                 Context: ${context}`
             }, {
                 role: "user",
