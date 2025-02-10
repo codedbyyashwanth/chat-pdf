@@ -119,23 +119,19 @@ app.post('/api/ask', async (req, res) => {
             model: "gpt-3.5-turbo",
             messages: [{
                 role: "system",
-                content: `Answer the question. 
+                content: `Answer the question with maximum of 3 sentences. 
                 Context: ${context}`
             }, {
                 role: "user",
                 content: question
             }],
-            temperature: 0.3,
+            temperature: 0.7,
             max_tokens: 500
         });
 
         res.json({
             question,
-            answer: completion.choices[0].message.content,
-            contextSources: queryResult.matches.map(match => ({
-                text: match.metadata.text,
-                score: match.score
-            }))
+            answer: completion.choices[0].message.content
         });
 
     } catch (error) {
