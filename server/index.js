@@ -119,7 +119,7 @@ app.post('/api/ask', async (req, res) => {
             model: "gpt-3.5-turbo",
             messages: [{
                 role: "system",
-                content: `Answer the question with maximum of 3 sentences. 
+                content: `Answer the question with atleast 1 sentence or maximum of 2 sentences. 
                 Context: ${context}`
             }, {
                 role: "user",
