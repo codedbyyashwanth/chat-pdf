@@ -1,13 +1,10 @@
 import { Button } from "@/components/ui/button"
-import { ModeToggle } from "./components/mode-toggle"
+import Navbar from "./components/navbar"
+
 
 const App = () => {
-    return <div>
-        <h1 className="text-3xl font-bold underline">
-            Hello world!
-        </h1>
-        <Button>Submit Me</Button>
-        <ModeToggle />
+    return <div className="min-h-[200vh]">
+        <Navbar />        
     </div>
 }
 
