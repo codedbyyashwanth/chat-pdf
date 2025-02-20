@@ -3,7 +3,7 @@ import { HeroContainer } from "./components/heroContainer"
 
 
 const App = () => {
-    return <div className="min-h-[200vh]">
+    return <div className="min-h-[90vh]">
         <Navbar />
         <HeroContainer />        
     </div>
