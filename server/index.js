@@ -3,10 +3,13 @@ import bodyParser from 'body-parser';
 import { config } from 'dotenv';
 import { Pinecone } from '@pinecone-database/pinecone';
 import OpenAI from 'openai';
+import cors from "cors";
+
 
 config();
 
 const app = express();
+app.use(cors());
 app.use(bodyParser.json());
 
 // Initialize clients

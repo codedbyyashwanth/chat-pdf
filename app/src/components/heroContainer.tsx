@@ -11,9 +11,25 @@ export function HeroContainer() {
 
             pdfToText(files[0])
                 .then(
-                    (text) => {
-                        
-                        console.log(text)
+                    async (text) => {
+                        try {
+                            const response = await fetch("http://localhost:3000/api/embeddings", {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                              },
+                              body: JSON.stringify({ text }),
+                            });
+                      
+                            if (!response.ok) {
+                              throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                      
+                            const data = await response.json();
+                            console.log(data)
+                          } catch (err: unknown) {
+                            console.log(err)
+                          }
                     })
                 .catch((error) => console.error("Failed to extract text from pdf", error));
         }
