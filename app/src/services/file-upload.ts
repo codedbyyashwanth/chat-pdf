@@ -12,7 +12,7 @@ const s3 = new AWS.S3();
 export const uploadFile = async (file: File) => {
     const params = {
         Bucket: config.bucketName!,
-        Key: `pdfs/${Date.now()}_${file.name}`,
+        Key: `${Date.now()}_${file.name}`,
         Body: file,
         ContentType: file.type
     };
@@ -20,6 +20,8 @@ export const uploadFile = async (file: File) => {
     try {
         const data = await s3.upload(params).promise();
         return data.Location;
+
+        
     } catch (error) {
         console.error('Upload error:', error);
         throw error;
@@ -32,8 +34,7 @@ export const getFileUrl = (fileName: string) => {
 
 export const listFiles = async () => {
     const params = {
-        Bucket: config.bucketName!,
-        Prefix: 'pdfs/'
+        Bucket: config.bucketName!
     };
 
     try {
