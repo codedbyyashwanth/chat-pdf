@@ -1,6 +1,5 @@
 import Navbar from "./components/navbar"
-import { HeroContainer } from "./components/heroContainer"
-
+import { HeroContainer } from "./components/HeroSection"
 
 
 const App = () => {
