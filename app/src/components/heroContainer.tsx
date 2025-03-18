@@ -1,37 +1,44 @@
 import { Button } from "@/components/ui/button";
 import pdfToText from "react-pdftotext";
+import { useNavigate } from 'react-router';
 
+export function HeroSection() {
+    const navigate = useNavigate();
 
-export function HeroContainer() {
     const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const files = event.target.files;
-        if (files && files.length > 0) {
+        const file = event.target.files?.[0];
+        if (file && file.type === 'application/pdf') {
+            const url = URL.createObjectURL(file);
+            const dta = {
+                link: url
+            }
+            navigate("/chat-pdf", {state: dta})
         // Handle file upload logic here
-            console.log("File selected:", files[0]);
+            // console.log("File selected:", files[0]);
 
-            pdfToText(files[0])
-                .then(
-                    async (text) => {
-                        try {
-                            const response = await fetch("http://localhost:3000/api/embeddings", {
-                              method: "POST",
-                              headers: {
-                                "Content-Type": "application/json",
-                              },
-                              body: JSON.stringify({ text }),
-                            });
+            // pdfToText(files[0])
+            //     .then(
+            //         async (text) => {
+            //             try {
+            //                 const response = await fetch("http://localhost:3000/api/embeddings", {
+            //                   method: "POST",
+            //                   headers: {
+            //                     "Content-Type": "application/json",
+            //                   },
+            //                   body: JSON.stringify({ text }),
+            //                 });
                       
-                            if (!response.ok) {
-                              throw new Error(`HTTP error! status: ${response.status}`);
-                            }
+            //                 if (!response.ok) {
+            //                   throw new Error(`HTTP error! status: ${response.status}`);
+            //                 }
                       
-                            const data = await response.json();
-                            console.log(data)
-                          } catch (err: unknown) {
-                            console.log(err)
-                          }
-                    })
-                .catch((error) => console.error("Failed to extract text from pdf", error));
+            //                 const data = await response.json();
+            //                 console.log(data)
+            //               } catch (err: unknown) {
+            //                 console.log(err)
+            //               }
+            //         })
+            //     .catch((error) => console.error("Failed to extract text from pdf", error));
         }
     };
 

@@ -1,9 +1,9 @@
-import { HeroContainer } from "@/components/heroContainer"
+import { HeroSection } from "@/components/heroContainer"
 
 
 const Home = () => {
     return <>
-        <HeroContainer />
+        <HeroSection />
     </>
 }
 
