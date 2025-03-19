@@ -2,7 +2,7 @@ import { useLocation } from "react-router";
 
 type Params = {
     link: string;
-  };
+};
 
 const ChatPDF = () => {
     const location = useLocation();

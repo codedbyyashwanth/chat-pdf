@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import pdfToText from "react-pdftotext";
 import { useNavigate } from 'react-router';
 
 export function HeroSection() {
