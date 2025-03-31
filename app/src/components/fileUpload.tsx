@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { uploadFile, getFileUrl } from '@/services/file-upload';
+import { uploadFile } from '@/services/file-upload';
 
 export const UploadPdf = () => {
     const [isUploading, setIsUploading] = useState(false);

@@ -1,43 +1,24 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from 'react-router';
+import { convertPdfToText } from "@/services/pdf-text";
 
 export function HeroSection() {
     const navigate = useNavigate();
 
-    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file && file.type === 'application/pdf') {
-            const url = URL.createObjectURL(file);
-            const dta = {
-                link: url
+            try {
+                const textData = await convertPdfToText(file);
+                const data = {
+                    text: textData,
+                    fileName: file.name
+                };
+                navigate("/chat-pdf", { state: data });
+            } catch (error) {
+                console.error("Error processing PDF:", error);
+                // Handle error appropriately
             }
-            navigate("/chat-pdf", {state: dta})
-        // Handle file upload logic here
-            // console.log("File selected:", files[0]);
-
-            // pdfToText(files[0])
-            //     .then(
-            //         async (text) => {
-            //             try {
-            //                 const response = await fetch("http://localhost:3000/api/embeddings", {
-            //                   method: "POST",
-            //                   headers: {
-            //                     "Content-Type": "application/json",
-            //                   },
-            //                   body: JSON.stringify({ text }),
-            //                 });
-                      
-            //                 if (!response.ok) {
-            //                   throw new Error(`HTTP error! status: ${response.status}`);
-            //                 }
-                      
-            //                 const data = await response.json();
-            //                 console.log(data)
-            //               } catch (err: unknown) {
-            //                 console.log(err)
-            //               }
-            //         })
-            //     .catch((error) => console.error("Failed to extract text from pdf", error));
         }
     };
 

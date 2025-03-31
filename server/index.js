@@ -74,7 +74,8 @@ app.post('/api/embeddings', async (req, res) => {
         
         res.status(201).json({
             success: true,
-            id: vectorData.id
+            id: vectorData.id,
+            text: text
         });
         
     } catch (error) {
