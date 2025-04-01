@@ -1,31 +1,140 @@
-import { useLocation } from "react-router";
+// src/pages/ChatPDF.tsx
+import React, { useState } from 'react';
+import { 
+  ResizableHandle, 
+  ResizablePanel, 
+  ResizablePanelGroup 
+} from "@/components/ui/resizable";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+// import { Input } from "@/components/ui/input";
+import { ChatUI } from '@/components/ChatUI';
+import { FileText, FolderPlus, Plus, Settings } from 'lucide-react';
 
-type TextData = {
-    success: boolean;
-    id: string;
-    text: string;
-};
+interface PDFFile {
+  id: string;
+  title: string;
+  path: string;
+}
 
-type Params = {
-    text: TextData;
-    fileName: string;
-};
+export default function ChatPDF() {
+  const [selectedFile, setSelectedFile] = useState<PDFFile | null>(null);
+  const [pdfFiles, setPdfFiles] = useState<PDFFile[]>([
+    { id: '1', title: 'enrollment.pdf', path: '/pdfs/enrollment.pdf' },
+    { id: '2', title: 'CV.pdf', path: '/pdfs/cv.pdf' },
+    { id: '3', title: 'Khokhar et al. 2010 - Surface EMG pattern r...', path: '/pdfs/khokhar.pdf' },
+  ]);
 
-const ChatPDF = () => {
-    const location = useLocation();
-    const values = location.state as Params;
+  const handleFileSelect = (file: PDFFile) => {
+    setSelectedFile(file);
+  };
 
-    return (
-        <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-bold mb-4 text-foreground">File: {values.fileName}</h1>
-            <div className="bg-card text-card-foreground rounded-lg shadow p-4 border">
-                <h2 className="text-xl font-semibold mb-2 text-foreground">Extracted Text:</h2>
-                <div className="whitespace-pre-wrap text-foreground/90">
-                    {values.text.text}
-                </div>
-            </div>
+  return (
+    <div className="h-screen flex flex-col">
+      <div className="flex items-center p-2 border-b">
+        <div className="flex items-center gap-2">
+          <div className="bg-purple-600 text-white p-1 rounded">
+            <FileText size={20} />
+          </div>
+          <span className="font-semibold">ChatPDF</span>
         </div>
-    );
-};
+        <div className="ml-auto">
+          <Button variant="ghost" size="icon">
+            <Settings size={20} />
+          </Button>
+        </div>
+      </div>
 
-export default ChatPDF;
+      <ResizablePanelGroup direction="horizontal" className="flex-1">
+        {/* First Column - PDF List */}
+        <ResizablePanel defaultSize={20} minSize={15}>
+          <div className="flex flex-col h-full border-r">
+            <div className="p-2 border-b">
+              <Button className="w-full justify-start" variant="outline">
+                <Plus size={16} className="mr-2" /> New Chat
+              </Button>
+              
+              <Button className="w-full justify-start mt-2" variant="outline">
+                <FolderPlus size={16} className="mr-2" /> New Folder
+              </Button>
+            </div>
+            
+            <ScrollArea className="flex-1">
+              <div className="p-2">
+                {pdfFiles.map((file) => (
+                  <div 
+                    key={file.id}
+                    className={`flex items-center p-2 rounded-md mb-1 cursor-pointer ${
+                      selectedFile?.id === file.id 
+                        ? 'bg-gray-800 text-white' 
+                        : 'hover:bg-gray-700'
+                    }`}
+                    onClick={() => handleFileSelect(file)}
+                  >
+                    <FileText size={16} className="mr-2" />
+                    <span className="truncate text-sm">{file.title}</span>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            
+            <div className="p-4 border-t mt-auto">
+              <div className="flex items-center gap-2">
+                <div className="bg-purple-600 text-white p-1 rounded-full">
+                  <span className="text-xs px-1">A</span>
+                </div>
+                <div className="text-sm">EN</div>
+              </div>
+              
+              <Button className="w-full justify-start mt-4" variant="outline">
+                <span className="mr-2">🎓</span> AI Scholar
+              </Button>
+              
+              <Button className="w-full justify-start mt-2" variant="outline">
+                <span className="mr-2">⏱️</span> Download Windows App
+              </Button>
+            </div>
+          </div>
+        </ResizablePanel>
+        
+        <ResizableHandle />
+        
+        {/* Second Column - PDF Viewer */}
+        <ResizablePanel defaultSize={50}>
+          <div className="flex flex-col h-full">
+            <div className="flex items-center p-2 border-b">
+              {selectedFile && (
+                <>
+                  <span className="text-sm">{selectedFile.title}</span>
+                  <div className="ml-auto flex items-center gap-2">
+                    <span className="text-xs text-gray-500">1 / 2</span>
+                    <Button variant="ghost" size="sm">Chat</Button>
+                  </div>
+                </>
+              )}
+            </div>
+            
+            <div className="flex-1 bg-gray-100 flex items-center justify-center">
+              {selectedFile ? (
+                <iframe
+                  src={selectedFile.path}
+                  className="w-full h-full"
+                  title="PDF Viewer"
+                />
+              ) : (
+                <div className="text-gray-400">No PDF selected</div>
+              )}
+            </div>
+          </div>
+        </ResizablePanel>
+        
+        <ResizableHandle />
+        
+        {/* Third Column - Chat UI */}
+        <ResizablePanel defaultSize={30}>
+          <ChatUI />
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    </div>
+  );
+}
