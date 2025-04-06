@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 // import { Input } from "@/components/ui/input";
 import { ChatUI } from '@/components/ChatUI';
 import { FileText, FolderPlus, Plus, Settings } from 'lucide-react';
-
+import PDFViewer from '@/components/pdfViewer';
 interface PDFFile {
   id: string;
   title: string;
@@ -117,12 +117,12 @@ export default function ChatPDF() {
             <div className="flex-1 bg-gray-100 flex items-center justify-center">
               {selectedFile ? (
                 <iframe
-                  src={selectedFile.path}
+                  src="https://pmc.ncbi.nlm.nih.gov/articles/PMC188396/pdf/3270501B.pdf"
                   className="w-full h-full"
                   title="PDF Viewer"
                 />
               ) : (
-                <div className="text-gray-400">No PDF selected</div>
+                <PDFViewer selectedFile={{ path: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC188396/pdf/3270501B.pdf' }} />
               )}
             </div>
           </div>
