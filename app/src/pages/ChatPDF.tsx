@@ -122,7 +122,7 @@ export default function ChatPDF() {
                   title="PDF Viewer"
                 />
               ) : (
-                <PDFViewer selectedFile={{ path: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC188396/pdf/3270501B.pdf' }} />
+                <PDFViewer selectedFile={{ path: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }} theme='dark' />
               )}
             </div>
           </div>

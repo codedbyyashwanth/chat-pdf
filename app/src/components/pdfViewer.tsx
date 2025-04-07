@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from "react";
 import { Button } from '@/components/ui/button';
 import {
   ChevronLeft,
@@ -9,65 +9,116 @@ import {
   ZoomIn,
   ZoomOut
 } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
-const PDFViewer = ({ selectedFile }) => {
+interface PdfViewerProps {
+  selectedFile: {
+    path: string;
+    name?: string;
+  } | null;
+}
+
+const PDFViewer = ({ selectedFile }: PdfViewerProps) => {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [numPages, setNumPages] = useState(5); // Example value
-  const [zoom, setZoom] = useState(100);
+  const [numPages, setNumPages] = useState(0);
+  const [zoom, setZoom] = useState(1);
   const [loading, setLoading] = useState(true);
+  const { theme } = useTheme();
   
+  // Handle file loading
   useEffect(() => {
-    // Simulate loading
-    if (selectedFile?.path) {
+    if (!selectedFile?.path) {
+      setNumPages(0);
+      return;
+    }
+    
+    setLoading(true);
+    setCurrentPage(1);
+    
+    // Reset loading state when iframe loads
+    const handleIframeLoad = () => {
       setLoading(false);
+      // In a real implementation, you might try to get numPages
+      // but it's difficult without a PDF library
+      setNumPages(1);
+    };
+    
+    const iframe = iframeRef.current;
+    if (iframe) {
+      iframe.addEventListener("load", handleIframeLoad);
+      return () => {
+        iframe.removeEventListener("load", handleIframeLoad);
+      };
     }
   }, [selectedFile]);
 
-  const handleZoomIn = () => {
-    setZoom(prevZoom => Math.min(prevZoom + 10, 200));
-  };
-
-  const handleZoomOut = () => {
-    setZoom(prevZoom => Math.max(prevZoom - 10, 50));
-  };
-
-  const goToNextPage = () => {
+  // Basic navigation functions (limited without PDF.js)
+  const nextPage = () => {
+    // Note: In iframe mode, these don't actually change pages
+    // Would need scripting inside iframe or a PDF library
     if (currentPage < numPages) {
       setCurrentPage(currentPage + 1);
     }
   };
-
-  const goToPrevPage = () => {
+  
+  const prevPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
     }
   };
-
+  
+  // Zoom functions
+  const handleZoomIn = () => {
+    setZoom(prevZoom => Math.min(prevZoom + 0.2, 3.0));
+  };
+  
+  const handleZoomOut = () => {
+    setZoom(prevZoom => Math.max(prevZoom - 0.2, 0.5));
+  };
+  
+  // Download and print functions
+  const handleDownload = () => {
+    if (selectedFile?.path) {
+      const link = document.createElement('a');
+      link.href = selectedFile.path;
+      link.download = selectedFile.name || 'download.pdf';
+      link.click();
+    }
+  };
+  
+  const handlePrint = () => {
+    if (iframeRef.current?.contentWindow) {
+      iframeRef.current.contentWindow.print();
+    }
+  };
+  
   return (
     <div className="flex flex-col h-full w-full">
-      {/* Navigation bar - styled to match screenshot */}
-      <div className="w-full flex items-center justify-between px-4 py-2 border-b">
+      {/* Navigation bar */}
+      <div className="w-full flex items-center justify-between px-4 py-2 border-b bg-background">
         {/* Left side: Navigation */}
         <div className="flex items-center space-x-1">
           <Button
             variant="ghost"
             size="icon"
-            onClick={goToPrevPage}
-            disabled={currentPage <= 1}
+            onClick={prevPage}
+            disabled={currentPage <= 1 || loading || !selectedFile?.path}
             className="h-8 w-8"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
           
-          <span className="text-sm font-medium mx-2">
-            {currentPage} / {numPages}
+          <span className="text-sm font-medium mx-2 text-foreground">
+            {currentPage} / {numPages || '-'}
           </span>
           
           <Button
             variant="ghost"
             size="icon" 
-            onClick={goToNextPage}
-            disabled={currentPage >= numPages}
+            onClick={nextPage}
+            disabled={currentPage >= numPages || loading || !selectedFile?.path}
             className="h-8 w-8"
           >
             <ChevronRight className="h-4 w-4" />
@@ -75,13 +126,34 @@ const PDFViewer = ({ selectedFile }) => {
         </div>
 
         {/* Center: Zoom */}
-        <div className="flex items-center">
+        <div className="flex items-center space-x-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleZoomOut}
+            disabled={zoom <= 0.5 || loading || !selectedFile?.path}
+            className="h-8 w-8"
+          >
+            <ZoomOut className="h-4 w-4" />
+          </Button>
+          
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 px-2"
+            className="h-8 px-2 text-foreground"
+            disabled={loading || !selectedFile?.path}
           >
-            {zoom}%
+            {Math.round(zoom * 100)}%
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleZoomIn}
+            disabled={zoom >= 3.0 || loading || !selectedFile?.path}
+            className="h-8 w-8"
+          >
+            <ZoomIn className="h-4 w-4" />
           </Button>
         </div>
 
@@ -91,6 +163,8 @@ const PDFViewer = ({ selectedFile }) => {
             variant="ghost"
             size="icon"
             className="h-8 w-8"
+            disabled={loading || !selectedFile?.path}
+            onClick={handleDownload}
           >
             <Download className="h-4 w-4" />
           </Button>
@@ -99,6 +173,8 @@ const PDFViewer = ({ selectedFile }) => {
             variant="ghost"
             size="icon"
             className="h-8 w-8"
+            disabled={loading || !selectedFile?.path}
+            onClick={handlePrint}
           >
             <Printer className="h-4 w-4" />
           </Button>
@@ -114,45 +190,43 @@ const PDFViewer = ({ selectedFile }) => {
       </div>
 
       {/* PDF content area */}
-      <div className="flex-1 bg-muted overflow-auto">
-        {loading ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-muted-foreground">Loading PDF...</div>
-          </div>
-        ) : (
-          <div className="flex justify-center p-4 min-h-full">
-            {/* PDF content with dark/light mode support */}
+      <div className="flex-1 bg-muted overflow-auto w-full p-4" ref={containerRef}>
+        <div className="flex justify-center min-h-full">
+          {!selectedFile?.path ? (
+            <div className="flex items-center justify-center h-full w-full">
+              <div className="text-muted-foreground">No PDF selected</div>
+            </div>
+          ) : (
             <div 
-              className="bg-background shadow-md"
+              className="shadow-md bg-background" 
               style={{ 
-                transform: `scale(${zoom/100})`, 
+                transform: `scale(${zoom})`, 
                 transformOrigin: 'top center',
-                maxWidth: '100%'
+                transition: 'transform 0.2s ease-in-out',
+                height: 'auto',
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'center'
               }}
             >
-              {/* PDF page mockup */}
-              <div className="relative">
-                <img 
-                  src="/api/placeholder/800/1100" 
-                  alt="PDF page" 
-                  className="w-full h-auto"
-                />
-                {selectedFile && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center p-6 bg-background/80 rounded-md">
-                      <p className="text-foreground">
-                        {selectedFile.path || "Document name"}
-                      </p>
-                      <p className="text-muted-foreground text-sm mt-2">
-                        Page {currentPage} of {numPages}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
+              {loading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
+                  <div className="text-muted-foreground">Loading PDF...</div>
+                </div>
+              )}
+              <iframe
+                ref={iframeRef}
+                src={selectedFile?.path}
+                className="border-none w-full"
+                style={{ 
+                  minHeight: '80vh',
+                  backgroundColor: theme === 'dark' ? '#2d333b' : 'white'
+                }}
+                title="PDF Viewer"
+              />
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
