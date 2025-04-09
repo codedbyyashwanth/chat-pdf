@@ -7,10 +7,11 @@ import {
 } from "@/components/ui/resizable";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
 import { ChatUI } from '@/components/ChatUI';
 import { FileText, FolderPlus, Plus, Settings } from 'lucide-react';
 import PDFViewer from '@/components/pdfViewer';
+import { ModeToggle } from '@/components/mode-toggle';
+
 interface PDFFile {
   id: string;
   title: string;
@@ -30,26 +31,33 @@ export default function ChatPDF() {
   };
 
   return (
-    <div className="h-screen flex flex-col">
-      <div className="flex items-center p-2 border-b">
+    <div className="h-screen flex flex-col overflow-hidden">
+      <div className="flex items-center p-2 border-b flex-shrink-0">
         <div className="flex items-center gap-2">
-          <div className="bg-purple-600 text-white p-1 rounded">
+          <div className="bg-blue-500 text-white p-1 rounded">
             <FileText size={20} />
           </div>
-          <span className="font-semibold">ChatPDF</span>
+          <a href="/" className="text-xl font-bold">
+                Chat
+                <span className="text-blue-500">PDF</span>
+            </a>
         </div>
         <div className="ml-auto">
+          <ModeToggle />
           <Button variant="ghost" size="icon">
             <Settings size={20} />
           </Button>
         </div>
       </div>
 
-      <ResizablePanelGroup direction="horizontal" className="flex-1">
+      <ResizablePanelGroup 
+        direction="horizontal" 
+        className="flex-1 h-[calc(100vh-2.5rem)] "
+      >
         {/* First Column - PDF List */}
         <ResizablePanel defaultSize={20} minSize={15}>
           <div className="flex flex-col h-full border-r">
-            <div className="p-2 border-b">
+            <div className="p-2 border-b flex-shrink-0">
               <Button className="w-full justify-start" variant="outline">
                 <Plus size={16} className="mr-2" /> New Chat
               </Button>
@@ -59,7 +67,7 @@ export default function ChatPDF() {
               </Button>
             </div>
             
-            <ScrollArea className="flex-1">
+            <ScrollArea className="flex-1 h-0">
               <div className="p-2">
                 {pdfFiles.map((file) => (
                   <div 
@@ -78,7 +86,7 @@ export default function ChatPDF() {
               </div>
             </ScrollArea>
             
-            <div className="p-4 border-t mt-auto">
+            <div className="p-4 border-t flex-shrink-0">
               <div className="flex items-center gap-2">
                 <div className="bg-purple-600 text-white p-1 rounded-full">
                   <span className="text-xs px-1">A</span>
@@ -102,7 +110,7 @@ export default function ChatPDF() {
         {/* Second Column - PDF Viewer */}
         <ResizablePanel defaultSize={50}>
           <div className="flex flex-col h-full">
-            <div className="flex items-center p-2 border-b">
+            <div className="flex items-center p-2 border-b flex-shrink-0">
               {selectedFile && (
                 <>
                   <span className="text-sm">{selectedFile.title}</span>
@@ -114,13 +122,9 @@ export default function ChatPDF() {
               )}
             </div>
             
-            <div className="flex-1 bg-gray-100 flex items-center justify-center">
+            <div className="flex-1 bg-gray-100 flex items-center justify-center overflow-hidden">
               {selectedFile ? (
-                <iframe
-                  src="https://pmc.ncbi.nlm.nih.gov/articles/PMC188396/pdf/3270501B.pdf"
-                  className="w-full h-full"
-                  title="PDF Viewer"
-                />
+                <PDFViewer selectedFile={{ path: selectedFile.path }} />
               ) : (
                 <PDFViewer selectedFile={{ path: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }} />
               )}
@@ -132,7 +136,9 @@ export default function ChatPDF() {
         
         {/* Third Column - Chat UI */}
         <ResizablePanel defaultSize={30}>
-          <ChatUI />
+          <div className="h-full overflow-hidden">
+            <ChatUI />
+          </div>
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
