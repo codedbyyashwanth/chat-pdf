@@ -97,10 +97,6 @@ export default function ChatPDF() {
               <Button className="w-full justify-start mt-4" variant="outline">
                 <span className="mr-2">🎓</span> AI Scholar
               </Button>
-              
-              <Button className="w-full justify-start mt-2" variant="outline">
-                <span className="mr-2">⏱️</span> Download Windows App
-              </Button>
             </div>
           </div>
         </ResizablePanel>
