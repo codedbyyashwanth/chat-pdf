@@ -1,10 +1,9 @@
-import { HeroSection } from "@/components/heroContainer"
-import Navbar from "@/components/navbar"
+import SplitLayout from "@/components/SplitLayout"
+
 
 const Home = () => {
     return <>
-        <Navbar />
-        <HeroSection />
+        <SplitLayout />
     </>
 }
 

@@ -60,7 +60,7 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border font-[Inter];
     }
   body {
     @apply bg-background text-foreground;
