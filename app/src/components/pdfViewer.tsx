@@ -1,14 +1,11 @@
 import React from 'react';
 
 interface PDFViewerProps {
-  selectedFile: {
-    path: string;
-    name?: string;
-  } | null;
+  selectedFile: string | null;
 }
 
 const PDFViewer: React.FC<PDFViewerProps> = ({ selectedFile }) => {
-  if (!selectedFile?.path) {
+  if (!selectedFile) {
     return (
       <div className="flex items-center justify-center h-full w-full p-4">
         <p className="text-muted-foreground">No PDF selected</p>
@@ -17,7 +14,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ selectedFile }) => {
   }
 
   // Encode the PDF URL to ensure it works with Google Docs viewer
-  const encodedUrl = encodeURIComponent(selectedFile.path);
+  const encodedUrl = encodeURIComponent(selectedFile);
   const googleDocsViewerUrl = `https://docs.google.com/viewer?url=${encodedUrl}&embedded=true`;
 
   return (
@@ -26,7 +23,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ selectedFile }) => {
         src={googleDocsViewerUrl}
         className="w-full h-full border-none"
         style={{ height: "100%" }}
-        title={selectedFile.name || "PDF Document"}
+        title={selectedFile || "PDF Document"}
         allowFullScreen
       />
     </div>
