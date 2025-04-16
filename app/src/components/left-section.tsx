@@ -1,9 +1,10 @@
 // components/left-section.tsx
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Upload, FileUp, File } from 'lucide-react';
+import { Upload, FileUp, File, Loader } from 'lucide-react';
 import { ModeToggle } from './mode-toggle';
 import PDFViewer from './pdf-viewer';
+import { convertPdfToText } from '@/services/pdf-text';
 
 interface LeftSectionProps {
   // You can add props here as needed
@@ -12,13 +13,34 @@ interface LeftSectionProps {
 const LeftSection: React.FC<LeftSectionProps> = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState(false); // Add loading state
+  const [pdfData, setPdfData] = useState<any>(null); // Store PDF text data
+
+  // Unified function to process PDF files from both upload methods
+  const processPdfFile = async (file: File) => {
+    setUploadedFile(file);
+    console.log("File uploaded:", file.name);
+    
+    // Start loading state
+    setIsLoading(true);
+    
+    try {
+      // Convert PDF to text
+      const result = await convertPdfToText(file);
+      setPdfData(result);
+      console.log("PDF processed successfully:", result);
+    } catch (error) {
+      console.error("Error processing PDF:", error);
+    } finally {
+      // End loading state regardless of success or failure
+      setIsLoading(false);
+    }
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type === "application/pdf") {
-      setUploadedFile(file);
-      console.log("File uploaded:", file.name);
-      // Process the PDF file
+      processPdfFile(file);
     }
   };
 
@@ -47,16 +69,29 @@ const LeftSection: React.FC<LeftSectionProps> = () => {
     
     const file = e.dataTransfer.files?.[0];
     if (file && file.type === "application/pdf") {
-      setUploadedFile(file);
-      console.log("File dropped:", file.name);
-      // Process the PDF file
+      processPdfFile(file);
     }
   };
 
   return (
-    <section className="w-1/2 h-screen bg-background border-r">
+    <section className="w-1/2 h-screen bg-background border-r relative">
+      {/* Loading overlay - shows when isLoading is true */}
+      {isLoading && (
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-10">
+          <div className="flex flex-col items-center">
+            <div className="animate-spin">
+              <Loader className="h-12 w-12 text-purple-600" />
+            </div>
+            <p className="mt-4 text-lg font-medium">Converting PDF to text...</p>
+          </div>
+        </div>
+      )}
+      
       {uploadedFile ? (
-        <PDFViewer file={uploadedFile} onClose={() => setUploadedFile(null)} />
+        <PDFViewer file={uploadedFile} onClose={() => {
+          setUploadedFile(null);
+          setPdfData(null); // Clear PDF data when closing viewer
+        }} />
       ) : (
         <div className="h-full flex flex-col justify-between p-6">
           {/* Main content area */}
