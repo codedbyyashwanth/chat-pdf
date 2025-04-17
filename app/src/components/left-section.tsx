@@ -1,10 +1,12 @@
 // components/left-section.tsx
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Upload, FileUp, File, Loader } from 'lucide-react';
+import { Upload, FileUp, File, Loader, AlertCircle, X } from 'lucide-react';
 import { ModeToggle } from './mode-toggle';
 import PDFViewer from './pdf-viewer';
 import { convertPdfToText } from '@/services/pdf-text';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 
 interface LeftSectionProps {
   // You can add props here as needed
@@ -15,11 +17,15 @@ const LeftSection: React.FC<LeftSectionProps> = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false); // Add loading state
   const [pdfData, setPdfData] = useState<any>(null); // Store PDF text data
+  const [error, setError] = useState<string | null>(null); // Add error state
 
   // Unified function to process PDF files from both upload methods
   const processPdfFile = async (file: File) => {
     setUploadedFile(file);
     console.log("File uploaded:", file.name);
+    
+    // Clear any previous errors
+    setError(null);
     
     // Start loading state
     setIsLoading(true);
@@ -27,10 +33,18 @@ const LeftSection: React.FC<LeftSectionProps> = () => {
     try {
       // Convert PDF to text
       const result = await convertPdfToText(file);
+      
+      if (!result) {
+        throw new Error("Failed to extract data from PDF");
+      }
+      
       setPdfData(result);
       console.log("PDF processed successfully:", result);
     } catch (error) {
       console.error("Error processing PDF:", error);
+      setError(error instanceof Error ? error.message : "Failed to process PDF");
+      // Set uploaded file to null since processing failed
+      setUploadedFile(null);
     } finally {
       // End loading state regardless of success or failure
       setIsLoading(false);
@@ -82,7 +96,47 @@ const LeftSection: React.FC<LeftSectionProps> = () => {
             <div className="animate-spin">
               <Loader className="h-12 w-12 text-purple-600" />
             </div>
-            <p className="mt-4 text-lg font-medium">Converting PDF to text...</p>
+            <p className="mt-4 text-lg font-medium">Extracting data to chat with PDF...</p>
+          </div>
+        </div>
+      )}
+      
+      {/* Error popup - shows when there's an error */}
+      {error && (
+        <div className="absolute inset-x-0 top-4 flex justify-center z-20 px-4">
+          <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-900 shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-5 duration-300">
+            <div className="p-4 bg-red-50 dark:bg-red-950/50 border-b border-red-100 dark:border-red-900/50 flex items-start gap-3">
+              <div className="bg-red-100 dark:bg-red-900/50 p-2 rounded-full flex-shrink-0">
+                <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-red-700 dark:text-red-400">Error Processing PDF</h3>
+                <p className="text-red-600 dark:text-red-300 text-sm mt-1">{error}</p>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 rounded-full text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" 
+                onClick={() => setError(null)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="p-4 flex flex-col gap-3">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                This could be due to network issues or the file may be corrupted.
+              </p>
+              <div className="flex gap-2 justify-end">
+                <Button 
+                  variant="default"
+                  size="sm"
+                  className="bg-red-600 hover:bg-red-700 text-sm"
+                  onClick={() => setError(null)}
+                >
+                  Dismiss
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       )}
