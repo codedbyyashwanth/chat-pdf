@@ -1,5 +1,5 @@
 // components/right-section.tsx
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +17,7 @@ interface Message {
 }
 
 const RightSection: React.FC<RightSectionProps> = () => {
-  const [messages, setMessages] = React.useState<Message[]>([
+  const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       text: 'Hello! I can help answer questions about your PDF. What would you like to know?',
@@ -25,10 +25,29 @@ const RightSection: React.FC<RightSectionProps> = () => {
       timestamp: new Date(),
     },
   ]);
-  const [inputValue, setInputValue] = React.useState('');
+  const [inputValue, setInputValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   
-  const handleSendMessage = () => {
-    if (inputValue.trim() === '') return;
+  // Add ref for the container div inside ScrollArea
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (container) {
+      // Try to find the scrollable viewport inside the ScrollArea
+      const scrollViewport = container.closest('[data-radix-scroll-area-viewport]');
+      if (scrollViewport) {
+        scrollViewport.scrollTop = scrollViewport.scrollHeight;
+      } else {
+        // Fallback: try to scroll the container itself
+        container.scrollTop = container.scrollHeight;
+      }
+    }
+  }, [messages]);
+  
+  const handleSendMessage = async () => {
+    if (inputValue.trim() === '' || isLoading) return;
     
     const newMessage: Message = {
       id: Date.now().toString(),
@@ -39,17 +58,67 @@ const RightSection: React.FC<RightSectionProps> = () => {
     
     setMessages([...messages, newMessage]);
     setInputValue('');
+    setIsLoading(true);
     
-    // Simulate AI response (would be replaced with actual logic)
-    setTimeout(() => {
-      const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        text: 'I\'m analyzing the PDF to find an answer to your question...',
-        sender: 'ai',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, aiResponse]);
-    }, 1000);
+    // Add loading message
+    const loadingMessageId = (Date.now() + 1).toString();
+    const loadingMessage: Message = {
+      id: loadingMessageId,
+      text: 'I\'m analyzing the PDF to find an answer to your question...',
+      sender: 'ai',
+      timestamp: new Date(),
+    };
+    
+    setMessages(prev => [...prev, loadingMessage]);
+    
+    try {
+      // Call the ask API
+      const response = await fetch('http://localhost:3000/api/ask', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ question: newMessage.text }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Replace the loading message with the actual response
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.id === loadingMessageId
+            ? {
+                ...msg,
+                id: (Date.now() + 2).toString(),
+                text: data.answer,
+                timestamp: new Date(),
+              }
+            : msg
+        )
+      );
+    } catch (error) {
+      console.error('Error asking question:', error);
+      
+      // Replace the loading message with an error message
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.id === loadingMessageId
+            ? {
+                ...msg,
+                id: (Date.now() + 2).toString(),
+                text: 'Sorry, I encountered an error while trying to answer your question. Make sure you\'ve uploaded a PDF.',
+                timestamp: new Date(),
+              }
+            : msg
+        )
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -68,7 +137,7 @@ const RightSection: React.FC<RightSectionProps> = () => {
       
       {/* Scrollable Content Area */}
       <ScrollArea className="flex-grow py-4 px-4">
-        <div className="space-y-4">
+        <div className="space-y-4" ref={messagesContainerRef}>
           {messages.map((message) => (
             <div 
               key={message.id} 
@@ -107,11 +176,17 @@ const RightSection: React.FC<RightSectionProps> = () => {
             onKeyDown={handleKeyPress}
             placeholder="Ask a question about your PDF..."
             className="flex-1 py-5"
+            disabled={isLoading}
           />
           <Button 
             onClick={handleSendMessage} 
             size="icon" 
-            className="rounded-full bg-purple-600 hover:bg-purple-700"
+            className={`rounded-full ${
+              isLoading 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-purple-600 hover:bg-purple-700'
+            }`}
+            disabled={isLoading}
           >
             <Send className="h-4 w-4" />
           </Button>
