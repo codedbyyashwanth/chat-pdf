@@ -10,7 +10,7 @@ config();
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb' })); // Increased limit for larger PDFs
 
 // Initialize clients
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -55,7 +55,13 @@ initializePinecone();
 // Embedding endpoint
 app.post('/api/embeddings', async (req, res) => {
     try {
-        const { text } = req.body;
+        const { text, chunkId } = req.body;
+        
+        if (!text) {
+            return res.status(400).json({ error: "Text content is required" });
+        }
+        
+        console.log(`Processing text chunk (${text.length} chars)${chunkId ? ` with ID ${chunkId}` : ''}`);
         
         // Generate OpenAI embedding
         const embedding = await openai.embeddings.create({
@@ -63,22 +69,27 @@ app.post('/api/embeddings', async (req, res) => {
             input: text,
         });
         
+        // Generate a unique ID or use the provided chunkId
+        const id = chunkId || Date.now().toString();
+        
         // Store in Pinecone
         const vectorData = {
-            id: Date.now().toString(),
+            id: id,
             values: embedding.data[0].embedding,
             metadata: { text }
         };
         
         await pineconeIndex.upsert([vectorData]);
+        console.log(`Successfully stored embedding with ID: ${id}`);
         
         res.status(201).json({
             success: true,
-            id: vectorData.id,
-            text: text
+            id: id,
+            text: text.length > 100 ? text.substring(0, 100) + '...' : text
         });
         
     } catch (error) {
+        console.error('Error in /api/embeddings:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -86,10 +97,16 @@ app.post('/api/embeddings', async (req, res) => {
 // Question answering endpoint
 app.post('/api/ask', async (req, res) => {
     try {
-        const { question } = req.body;
+        const { question, documentID } = req.body;
+
+        console.log(`Received question: "${question}" for document ID: ${documentID}`);
 
         if (!question || typeof question !== 'string') {
             return res.status(400).json({ error: "Valid question string is required" });
+        }
+
+        if (!documentID) {
+            return res.status(400).json({ error: "Document ID is required" });
         }
 
         // Generate question embedding
@@ -98,44 +115,85 @@ app.post('/api/ask', async (req, res) => {
             input: question,
         });
 
-        // Query Pinecone for similar vectors
+        console.log("Generated embedding for question");
+
+        // Query Pinecone for similar vectors - don't filter by ID initially to debug
         const queryResult = await pineconeIndex.query({
             vector: questionEmbedding.data[0].embedding,
-            topK: 5,
+            // Remove the filter to see if there are any documents at all
+            topK: 5, // Increased from 1 to 5 to get more context
             includeMetadata: true,
         });
 
-        // Extract and format context
-        const context = queryResult.matches
-            .filter(match => match.score >= 0.3) // Filter by confidence score
-            .map(match => match.metadata.text)
-            .join('\n\n');
-
-        if (!context) {
-            return res.status(404).json({ 
-                error: "No relevant context found",
-                question
+        console.log(`Query results without ID filter: ${queryResult.matches.length} matches`);
+        
+        // List all available documents for debugging
+        if (queryResult.matches.length > 0) {
+            console.log("Available documents:");
+            queryResult.matches.forEach((match, i) => {
+                console.log(`${i+1}. ID: ${match.id}, Score: ${match.score}`);
             });
+            
+            // Now try to find the exact document ID
+            const exactMatch = queryResult.matches.find(match => match.id === documentID);
+            if (exactMatch) {
+                console.log(`Found exact match for document ID: ${documentID}`);
+                
+                // Generate answer using OpenAI
+                const completion = await openai.chat.completions.create({
+                    model: "gpt-3.5-turbo",
+                    messages: [{
+                        role: "system",
+                        content: `Answer the question based on the provided context. Keep your answer concise.
+                        
+                        Context: ${exactMatch.metadata.text}`
+                    }, {
+                        role: "user",
+                        content: question
+                    }],
+                    temperature: 0.7,
+                    max_tokens: 500
+                });
+
+                return res.json({
+                    question,
+                    answer: completion.choices[0].message.content
+                });
+            } else {
+                console.log(`Document ID ${documentID} not found in available documents`);
+                
+                // Try the best match regardless of ID
+                const bestMatch = queryResult.matches[0];
+                if (bestMatch.score >= 0.5) { // Only use if it's a good match
+                    console.log(`Using best available match (score: ${bestMatch.score})`);
+                    
+                    const completion = await openai.chat.completions.create({
+                        model: "gpt-3.5-turbo",
+                        messages: [{
+                            role: "system",
+                            content: `Answer the question based on the provided context. Keep your answer concise.
+                            
+                            Context: ${bestMatch.metadata.text}`
+                        }, {
+                            role: "user",
+                            content: question
+                        }],
+                        temperature: 0.7,
+                        max_tokens: 500
+                    });
+
+                    return res.json({
+                        question,
+                        answer: completion.choices[0].message.content
+                    });
+                }
+            }
         }
 
-        // Generate answer using OpenAI
-        const completion = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
-            messages: [{
-                role: "system",
-                content: `Answer the question with atleast 1 sentence or maximum of 2 sentences. 
-                Context: ${context}`
-            }, {
-                role: "user",
-                content: question
-            }],
-            temperature: 0.7,
-            max_tokens: 500
-        });
-
-        res.json({
-            question,
-            answer: completion.choices[0].message.content
+        // If we reach here, no suitable matches were found
+        return res.status(404).json({ 
+            error: "No relevant context found",
+            question
         });
 
     } catch (error) {
@@ -147,6 +205,7 @@ app.post('/api/ask', async (req, res) => {
     }
 });
 
-app.listen(process.env.PORT, () => {
-    console.log(`Server running on port ${process.env.PORT}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });

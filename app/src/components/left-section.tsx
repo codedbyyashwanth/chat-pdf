@@ -9,14 +9,14 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 
 interface LeftSectionProps {
-  // You can add props here as needed
+  pdfData: any;
+  setPdfData: React.Dispatch<React.SetStateAction<any>>;
 }
 
-const LeftSection: React.FC<LeftSectionProps> = () => {
+const LeftSection: React.FC<LeftSectionProps> = ({ pdfData, setPdfData }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false); // Add loading state
-  const [pdfData, setPdfData] = useState<any>(null); // Store PDF text data
   const [error, setError] = useState<string | null>(null); // Add error state
 
   // Unified function to process PDF files from both upload methods
