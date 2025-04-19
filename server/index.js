@@ -144,7 +144,11 @@ app.post('/api/ask', async (req, res) => {
                     model: "gpt-3.5-turbo",
                     messages: [{
                         role: "system",
-                        content: `Answer the question based on the provided context. Keep your answer concise.
+                        content: `You are a precise, context-driven assistant. 
+                        - You must answer using only the provided “Context” block—do not draw on any outside knowledge. 
+                        - If the user's question uses different wording than the context, mentally paraphrase or expand synonyms to find the matching passage. 
+                        - If the answer cannot be found in the context, reply: “I'm sorry, I don't know.” 
+                        - Keep your answer as concise as possible.
                         
                         Context: ${exactMatch.metadata.text}`
                     }, {
