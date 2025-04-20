@@ -272,7 +272,7 @@ const RightSection: React.FC<RightSectionProps> = ({ pdfData, messages, setMessa
             className={`rounded-full ${
               isLoading || !pdfData
                 ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-purple-600 hover:bg-purple-700'
+                : 'bg-purple-600 hover:bg-purple-700 dark:text-white'
             }`}
             disabled={isLoading || !pdfData}
           >
