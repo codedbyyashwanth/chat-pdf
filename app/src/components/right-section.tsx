@@ -268,9 +268,9 @@ const RightSection: React.FC<RightSectionProps> = ({ pdfData }) => {
       {/* Fixed Footer with Input */}
       <div className="border-t p-4">
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" className="rounded-full">
+          {/* <Button variant="outline" size="icon" className="rounded-full">
             <PaperclipIcon className="h-4 w-4" />
-          </Button>
+          </Button> */}
           <Input
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}

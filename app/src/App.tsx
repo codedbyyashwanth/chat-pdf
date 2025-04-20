@@ -1,22 +1,10 @@
-// Install react-router-dom first if not already installed
-// npm install react-router-dom
+import SplitLayout from "@/components/SplitLayout"
 
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router';
-import HomePage from './pages/Home';
-import ChatPDFPage from './pages/ChatPDF';
-import Navbar from './components/navbar';
 
-function App() {
-    return (
-        <>
-            <Router>
-                <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/chat-pdf" element={<ChatPDFPage />} />
-                </Routes>
-            </Router>
-        </>
-    );
+const App = () => {
+    return <>
+        <SplitLayout />
+    </>
 }
 
-export default App;
+export default App
