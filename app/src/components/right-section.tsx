@@ -5,27 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Send, PaperclipIcon, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Message } from './SplitLayout'; // Import from SplitLayout
 
 interface RightSectionProps {
-  pdfData: any; // Add the pdfData prop
+  pdfData: any;
+  messages: Message[]; // Now passed as a prop
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>; // Function to update messages
 }
 
-interface Message {
-  id: string;
-  text: string;
-  sender: 'user' | 'ai';
-  timestamp: Date;
-}
-
-const RightSection: React.FC<RightSectionProps> = ({ pdfData }) => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: 'Hello! I can help answer questions about your PDF. What would you like to know?',
-      sender: 'ai',
-      timestamp: new Date(),
-    },
-  ]);
+const RightSection: React.FC<RightSectionProps> = ({ pdfData, messages, setMessages }) => {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorAlert, setErrorAlert] = useState<string | null>(null);
@@ -164,16 +152,18 @@ const RightSection: React.FC<RightSectionProps> = ({ pdfData }) => {
     }
   };
 
-  // Show different message when no PDF is uploaded
+  // Update welcome message based on PDF state
   useEffect(() => {
-    if (!pdfData && messages.length === 1 && messages[0].id === '1') {
+    if (!pdfData && messages.length === 1 && messages[0].id === '1' && 
+        messages[0].text !== 'Please upload a PDF first to start chatting!') {
       setMessages([{
         id: '1',
         text: 'Please upload a PDF first to start chatting!',
         sender: 'ai',
         timestamp: new Date(),
       }]);
-    } else if (pdfData && messages.length === 1 && messages[0].text === 'Please upload a PDF first to start chatting!') {
+    } else if (pdfData && messages.length === 1 && 
+               messages[0].text === 'Please upload a PDF first to start chatting!') {
       setMessages([{
         id: '1',
         text: `Great! Your PDF has been uploaded and processed. What would you like to know about it?`,
@@ -181,7 +171,7 @@ const RightSection: React.FC<RightSectionProps> = ({ pdfData }) => {
         timestamp: new Date(),
       }]);
     }
-  }, [pdfData]);
+  }, [pdfData, messages, setMessages]);
   
   // Log pdfData for debugging
   useEffect(() => {
@@ -268,9 +258,9 @@ const RightSection: React.FC<RightSectionProps> = ({ pdfData }) => {
       {/* Fixed Footer with Input */}
       <div className="border-t p-4">
         <div className="flex items-center gap-2">
-          {/* <Button variant="outline" size="icon" className="rounded-full">
+          <Button variant="outline" size="icon" className="rounded-full">
             <PaperclipIcon className="h-4 w-4" />
-          </Button> */}
+          </Button>
           <Input
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}

@@ -11,9 +11,10 @@ import { Button } from '@/components/ui/button';
 interface LeftSectionProps {
   pdfData: any;
   setPdfData: React.Dispatch<React.SetStateAction<any>>;
+  resetChat: () => void; // Add this new prop
 }
 
-const LeftSection: React.FC<LeftSectionProps> = ({ pdfData, setPdfData }) => {
+const LeftSection: React.FC<LeftSectionProps> = ({ pdfData, setPdfData, resetChat }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false); // Add loading state
@@ -145,6 +146,7 @@ const LeftSection: React.FC<LeftSectionProps> = ({ pdfData, setPdfData }) => {
         <PDFViewer file={uploadedFile} onClose={() => {
           setUploadedFile(null);
           setPdfData(null); // Clear PDF data when closing viewer
+          resetChat(); 
         }} />
       ) : (
         <div className="h-full flex flex-col justify-between p-6">
