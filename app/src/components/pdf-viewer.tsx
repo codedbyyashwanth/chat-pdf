@@ -26,6 +26,25 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ file, onClose }) => {
     };
   }, [fileUrl]);
 
+  // Handle PDF download
+  const handleDownload = () => {
+    // Create a URL without the toolbar parameters
+    const downloadUrl = URL.createObjectURL(file);
+    
+    // Create a temporary anchor element
+    const downloadLink = document.createElement('a');
+    downloadLink.href = downloadUrl;
+    downloadLink.download = file.name; // Use the original filename
+    
+    // Append to the body, click it, and then remove it
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    
+    // Clean up the URL object
+    URL.revokeObjectURL(downloadUrl);
+  };
+
 //   const handleNextPage = () => {
 //     if (currentPage < totalPages) {
 //       setCurrentPage(currentPage + 1);
@@ -41,7 +60,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ file, onClose }) => {
   return (
     <div className="flex flex-col h-full w-full">
       {/* Custom header - Simple and clean */}
-      <div className="flex items-center justify-between py-3 px-4 border-b bg-white dark:bg-gray-800">
+      <div className="flex items-center justify-between py-3 px-4 border-b bg-white dark:bg-background">
         <div className="flex items-center gap-3">
           <Button 
             variant="ghost" 
@@ -53,7 +72,12 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ file, onClose }) => {
           </Button>
           <span className="font-medium text-sm">{file.name}</span>
         </div>
-        <Button variant="ghost" size="sm" className="gap-1.5 text-sm font-normal">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="gap-1.5 text-sm font-normal"
+          onClick={handleDownload}
+        >
           <Download className="h-4 w-4" />
           Download
         </Button>
@@ -89,7 +113,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ file, onClose }) => {
       </div>
       
       {/* Custom footer with page controls */}
-      {/* <div className="flex items-center justify-center py-2 px-4 border-t bg-white dark:bg-gray-800">
+      {/* <div className="flex items-center justify-center py-2 px-4 border-t bg-white dark:bg-background">
         <div className="flex items-center">
           <Button
             variant="ghost"

@@ -103,7 +103,7 @@ export function PdfUploadSection() {
             justify-center
             rounded-full
             bg-gray-100
-            dark:bg-gray-800
+            dark:bg-background
           "
         >
           <svg

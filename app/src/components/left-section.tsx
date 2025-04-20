@@ -105,7 +105,7 @@ const LeftSection: React.FC<LeftSectionProps> = ({ pdfData, setPdfData, resetCha
       {/* Error popup - shows when there's an error */}
       {error && (
         <div className="absolute inset-x-0 top-4 flex justify-center z-20 px-4">
-          <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-900 shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-5 duration-300">
+          <div className="w-full max-w-md bg-white dark:bg-background rounded-lg border border-red-200 dark:border-red-900 shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-5 duration-300">
             <div className="p-4 bg-red-50 dark:bg-red-950/50 border-b border-red-100 dark:border-red-900/50 flex items-start gap-3">
               <div className="bg-red-100 dark:bg-red-900/50 p-2 rounded-full flex-shrink-0">
                 <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
@@ -175,7 +175,7 @@ const LeftSection: React.FC<LeftSectionProps> = ({ pdfData, setPdfData, resetCha
                 onDrop={handleDrop}
               >
                 <div className="mb-4 relative">
-                  <div className="w-16 h-20 bg-white dark:bg-gray-800 rounded-md border shadow-sm flex items-center justify-center">
+                  <div className="w-16 h-20 bg-white dark:bg-background rounded-md border shadow-sm flex items-center justify-center">
                     <File className="h-8 w-8 text-purple-500" />
                     <div className="absolute -bottom-2 -right-2 bg-black text-white rounded-full p-1.5">
                       <Upload className="h-4 w-4" />
