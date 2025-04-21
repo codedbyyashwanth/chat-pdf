@@ -1,8 +1,6 @@
-// components/pdf-viewer.tsx
-import React, { useState } from 'react';
-import { X, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import React from 'react';
+import { X, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
 interface PDFViewerProps {
   file: File;
@@ -10,8 +8,6 @@ interface PDFViewerProps {
 }
 
 const PDFViewer: React.FC<PDFViewerProps> = ({ file, onClose }) => {
-//   const [currentPage, setCurrentPage] = useState(1);
-//   const [totalPages, setTotalPages] = useState(10); // Default to 10 pages
   
   // Create a URL for the file
   const fileUrl = React.useMemo(() => {

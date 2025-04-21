@@ -1,24 +1,23 @@
-// components/left-section.tsx
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Upload, FileUp, File, Loader, AlertCircle, X } from 'lucide-react';
 import { ModeToggle } from './mode-toggle';
 import PDFViewer from './pdf-viewer';
 import { convertPdfToText } from '@/services/pdf-text';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 
 interface LeftSectionProps {
   pdfData: any;
   setPdfData: React.Dispatch<React.SetStateAction<any>>;
-  resetChat: () => void; // Add this new prop
+  resetChat: () => void; 
 }
 
-const LeftSection: React.FC<LeftSectionProps> = ({ pdfData, setPdfData, resetChat }) => {
+const LeftSection: React.FC<LeftSectionProps> = ({ setPdfData, resetChat }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [isLoading, setIsLoading] = useState(false); // Add loading state
-  const [error, setError] = useState<string | null>(null); // Add error state
+  const [isLoading, setIsLoading] = useState(false); 
+  const [error, setError] = useState<string | null>(null); 
 
   // Unified function to process PDF files from both upload methods
   const processPdfFile = async (file: File) => {
