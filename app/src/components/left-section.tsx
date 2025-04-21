@@ -155,10 +155,10 @@ const LeftSection: React.FC<LeftSectionProps> = ({ pdfData, setPdfData, resetCha
             {/* PDF Chat Header */}
             <div className="text-center mb-8">
               <h1 className="text-5xl font-bold mb-4 tracking-tight">
-                Chat with any <span className="bg-purple-600 text-white px-3 py-1 rounded-lg">PDF</span>
+              Explore PDF with <span className="bg-purple-600 text-white px-3 py-1 rounded-lg">AI</span>
               </h1>
               <p className="text-lg text-muted-foreground max-w-lg">
-                Join millions of <span className="text-amber-500 font-medium">students, researchers and professionals</span> to instantly answer questions and understand research with AI
+              AI helps you understand what matters in any document —  <span className="text-amber-500 font-medium">no more second-guessing</span> what the text really means. 
               </p>
             </div>
             
