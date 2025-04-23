@@ -9,7 +9,12 @@ import cors from "cors";
 config();
 
 const app = express();
-app.use(cors());
+// app.use(cors());
+app.use(cors({
+    origin: ['http://localhost:5173', 'https://your-production-frontend-domain.com'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }));
 app.use(bodyParser.json({ limit: '50mb' })); // Increased limit for larger PDFs
 
 // Initialize clients
