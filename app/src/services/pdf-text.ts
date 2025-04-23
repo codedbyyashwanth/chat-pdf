@@ -20,7 +20,7 @@ export const convertPdfToText = async (file: File) => {
         const documentId = file.name.replace(/\s+/g, '-').toLowerCase();
         
         // Store the text with the document ID
-        const response = await fetch(`${import.meta.env.VITE_URL}/embeddings`, {
+        const response = await fetch(`${import.meta.env.VITE_URL}/api/embeddings`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
