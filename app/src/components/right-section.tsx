@@ -291,9 +291,6 @@ const RightSection: React.FC<RightSectionProps> = ({
       {/* Fixed Footer with Input */}
       <div className="border-t p-3 md:p-4">
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" className="rounded-full h-8 w-8 md:h-10 md:w-10">
-            <PaperclipIcon className="h-3 w-3 md:h-4 md:w-4" />
-          </Button>
           <Input
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
