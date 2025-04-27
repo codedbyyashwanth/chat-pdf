@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Upload, FileUp, File, Loader, AlertCircle, X } from 'lucide-react';
+import { Upload, FileUp, File, Loader, AlertCircle, X, MessageSquare } from 'lucide-react';
 import { ModeToggle } from './mode-toggle';
 import PDFViewer from './pdf-viewer';
 import { convertPdfToText } from '@/services/pdf-text';
@@ -10,14 +10,22 @@ import { Button } from '@/components/ui/button';
 interface LeftSectionProps {
   pdfData: any;
   setPdfData: React.Dispatch<React.SetStateAction<any>>;
-  resetChat: () => void; 
+  className?: string;
+  onSwitchToChat?: () => void;
+  isMobileView?: boolean;
 }
 
-const LeftSection: React.FC<LeftSectionProps> = ({ setPdfData, resetChat }) => {
+const LeftSection: React.FC<LeftSectionProps> = ({ 
+  pdfData, 
+  setPdfData, 
+  className, 
+  onSwitchToChat,
+  isMobileView 
+}) => {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [isLoading, setIsLoading] = useState(false); 
-  const [error, setError] = useState<string | null>(null); 
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Unified function to process PDF files from both upload methods
   const processPdfFile = async (file: File) => {
@@ -88,7 +96,18 @@ const LeftSection: React.FC<LeftSectionProps> = ({ setPdfData, resetChat }) => {
   };
 
   return (
-    <section className="w-1/2 h-screen bg-background border-r relative">
+    <section className={cn("bg-background border-r relative", className)}>
+      {/* Mobile chat button - only show when PDF is loaded */}
+      {isMobileView && uploadedFile && pdfData && (
+        <Button 
+          className="absolute top-4 right-4 z-20 rounded-full bg-purple-600 hover:bg-purple-700 shadow-md"
+          size="icon"
+          onClick={onSwitchToChat}
+        >
+          <MessageSquare className="h-4 w-4" />
+        </Button>
+      )}
+      
       {/* Loading overlay - shows when isLoading is true */}
       {isLoading && (
         <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-10">
@@ -104,7 +123,7 @@ const LeftSection: React.FC<LeftSectionProps> = ({ setPdfData, resetChat }) => {
       {/* Error popup - shows when there's an error */}
       {error && (
         <div className="absolute inset-x-0 top-4 flex justify-center z-20 px-4">
-          <div className="w-full max-w-md bg-white dark:bg-background rounded-lg border border-red-200 dark:border-red-900 shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-5 duration-300">
+          <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-900 shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-5 duration-300">
             <div className="p-4 bg-red-50 dark:bg-red-950/50 border-b border-red-100 dark:border-red-900/50 flex items-start gap-3">
               <div className="bg-red-100 dark:bg-red-900/50 p-2 rounded-full flex-shrink-0">
                 <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
@@ -142,30 +161,34 @@ const LeftSection: React.FC<LeftSectionProps> = ({ setPdfData, resetChat }) => {
       )}
       
       {uploadedFile ? (
-        <PDFViewer file={uploadedFile} onClose={() => {
-          setUploadedFile(null);
-          setPdfData(null); // Clear PDF data when closing viewer
-          resetChat(); 
-        }} />
+        <PDFViewer 
+          file={uploadedFile} 
+          onClose={() => {
+            setUploadedFile(null);
+            setPdfData(null); // Clear PDF data when closing viewer
+          }} 
+          isMobileView={isMobileView}
+          onSwitchToChat={onSwitchToChat}
+        />
       ) : (
-        <div className="h-full flex flex-col justify-between p-6">
+        <div className="h-full flex flex-col justify-between p-4 md:p-6">
           {/* Main content area */}
-          <div className="flex-1 flex flex-col items-center justify-center px-4">
+          <div className="flex-1 flex flex-col items-center justify-center px-2 md:px-4">
             {/* PDF Chat Header */}
-            <div className="text-center mb-8">
-              <h1 className="text-5xl font-bold mb-4 tracking-tight">
-              Explore PDF with <span className="bg-purple-600 text-white px-3 py-1 rounded-lg">AI</span>
+            <div className="text-center mb-6 md:mb-8">
+              <h1 className="text-3xl md:text-5xl font-bold mb-3 md:mb-4 tracking-tight">
+                Chat with any <span className="bg-purple-600 text-white px-3 py-1 rounded-lg">PDF</span>
               </h1>
-              <p className="text-lg text-muted-foreground max-w-lg">
-              AI helps you understand what matters in any document —  <span className="text-amber-500 font-medium">no more second-guessing</span> what the text really means. 
+              <p className="text-base md:text-lg text-muted-foreground max-w-lg">
+                Join millions of <span className="text-amber-500 font-medium">students, researchers and professionals</span> to instantly answer questions and understand research with AI
               </p>
             </div>
             
             {/* PDF Upload Area */}
-            <div className="w-full max-w-xl mt-6">
+            <div className="w-full max-w-xl mt-4 md:mt-6">
               <div 
                 className={cn(
-                  "border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center bg-background/50 transition-all duration-200",
+                  "border-2 border-dashed rounded-xl p-6 md:p-10 flex flex-col items-center justify-center bg-background/50 transition-all duration-200",
                   isDragging ? "border-purple-500 bg-purple-50 dark:bg-purple-950/20" : "border-purple-200 dark:border-purple-800/40"
                 )}
                 onDragEnter={handleDragEnter}
@@ -174,18 +197,18 @@ const LeftSection: React.FC<LeftSectionProps> = ({ setPdfData, resetChat }) => {
                 onDrop={handleDrop}
               >
                 <div className="mb-4 relative">
-                  <div className="w-16 h-20 bg-white dark:bg-background rounded-md border shadow-sm flex items-center justify-center">
-                    <File className="h-8 w-8 text-purple-500" />
+                  <div className="w-12 h-16 md:w-16 md:h-20 bg-white dark:bg-gray-800 rounded-md border shadow-sm flex items-center justify-center">
+                    <File className="h-6 w-6 md:h-8 md:w-8 text-purple-500" />
                     <div className="absolute -bottom-2 -right-2 bg-black text-white rounded-full p-1.5">
-                      <Upload className="h-4 w-4" />
+                      <Upload className="h-3 w-3 md:h-4 md:w-4" />
                     </div>
                   </div>
                 </div>
-                <p className="text-xl mb-6 text-center font-medium">Click to upload, or drag PDF here</p>
+                <p className="text-lg md:text-xl mb-4 md:mb-6 text-center font-medium">Click to upload, or drag PDF here</p>
                 
                 <label htmlFor="file-upload" className="cursor-pointer">
-                  <div className="bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg px-8 py-3 flex items-center shadow-sm transition-colors">
-                    <FileUp className="mr-2 h-5 w-5" />
+                  <div className="bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg px-6 md:px-8 py-2 md:py-3 flex items-center shadow-sm transition-colors">
+                    <FileUp className="mr-2 h-4 w-4 md:h-5 md:w-5" />
                     Upload PDF
                   </div>
                   <input 

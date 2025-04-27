@@ -1,55 +1,59 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// SplitLayout.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import LeftSection from './left-section';
 import RightSection from './right-section';
-
-// Define Message interface (moved from right-section.tsx)
-export interface Message {
-  id: string;
-  text: string;
-  sender: 'user' | 'ai';
-  timestamp: Date;
-}
-
 
 
 const SplitLayout: React.FC = () => {
   // Lifted state from left-section.tsx to be shared
   const [pdfData, setPdfData] = useState<any>(null); // Store PDF text data
-  
-  // Lifted messages state from right-section.tsx
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: 'Hello! I can help answer questions about your PDF. What would you like to know?',
-      sender: 'ai',
-      timestamp: new Date(),
-    },
-  ]);
+  const [isMobileView, setIsMobileView] = useState(false);
+  const [activeSection, setActiveSection] = useState<'left' | 'right'>('left');
 
-  // Function to reset chat when PDF is closed
-  const resetChat = () => {
-    setMessages([{
-      id: '1',
-      text: 'Please upload a PDF first to start chatting!',
-      sender: 'ai',
-      timestamp: new Date(),
-    }]);
-  };
+  // Detect screen size changes
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileView(window.innerWidth < 768);
+    };
+    
+    // Initial check
+    handleResize();
+    
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+    
+    // Cleanup
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // When PDF is loaded, switch to chat view on mobile
+  useEffect(() => {
+    if (pdfData && isMobileView) {
+      setActiveSection('right');
+    }
+  }, [pdfData, isMobileView]);
 
   return (
-    <div className="flex w-full h-screen">
-      <LeftSection 
-        pdfData={pdfData} 
-        setPdfData={setPdfData}
-        resetChat={resetChat} 
-      />
-      <RightSection 
-        pdfData={pdfData} 
-        messages={messages}
-        setMessages={setMessages}
-      />
+    <div className="flex flex-col md:flex-row w-full h-screen">
+      {/* On mobile, conditionally show either left or right section based on activeSection */}
+      {(!isMobileView || activeSection === 'left') && (
+        <LeftSection 
+          pdfData={pdfData} 
+          setPdfData={setPdfData} 
+          className={isMobileView ? 'w-full h-screen' : 'w-1/2 h-screen'} 
+          onSwitchToChat={() => setActiveSection('right')}
+          isMobileView={isMobileView}
+        />
+      )}
+      
+      {(!isMobileView || activeSection === 'right') && (
+        <RightSection 
+          pdfData={pdfData} 
+          className={isMobileView ? 'w-full h-screen' : 'w-1/2 h-screen'}
+          onSwitchToPdf={() => setActiveSection('left')}
+          isMobileView={isMobileView}
+        />
+      )}
     </div>
   );
 };

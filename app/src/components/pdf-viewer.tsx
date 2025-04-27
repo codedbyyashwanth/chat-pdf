@@ -1,14 +1,20 @@
 import React from 'react';
-import { X, Download } from 'lucide-react';
+import { X, Download, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface PDFViewerProps {
   file: File;
   onClose: () => void;
+  isMobileView?: boolean;
+  onSwitchToChat?: () => void;
 }
 
-const PDFViewer: React.FC<PDFViewerProps> = ({ file, onClose }) => {
-  
+const PDFViewer: React.FC<PDFViewerProps> = ({ 
+  file, 
+  onClose, 
+  isMobileView,
+  onSwitchToChat
+}) => {
   // Create a URL for the file
   const fileUrl = React.useMemo(() => {
     // Add parameters to hide toolbar across different browsers
@@ -22,61 +28,40 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ file, onClose }) => {
     };
   }, [fileUrl]);
 
-  // Handle PDF download
-  const handleDownload = () => {
-    // Create a URL without the toolbar parameters
-    const downloadUrl = URL.createObjectURL(file);
-    
-    // Create a temporary anchor element
-    const downloadLink = document.createElement('a');
-    downloadLink.href = downloadUrl;
-    downloadLink.download = file.name; // Use the original filename
-    
-    // Append to the body, click it, and then remove it
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
-    
-    // Clean up the URL object
-    URL.revokeObjectURL(downloadUrl);
-  };
-
-//   const handleNextPage = () => {
-//     if (currentPage < totalPages) {
-//       setCurrentPage(currentPage + 1);
-//     }
-//   };
-
-//   const handlePrevPage = () => {
-//     if (currentPage > 1) {
-//       setCurrentPage(currentPage - 1);
-//     }
-//   };
-
   return (
     <div className="flex flex-col h-full w-full">
       {/* Custom header - Simple and clean */}
-      <div className="flex items-center justify-between py-3 px-4 border-b bg-white dark:bg-background">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between py-2 md:py-3 px-3 md:px-4 border-b bg-white dark:bg-gray-800">
+        <div className="flex items-center gap-2 md:gap-3">
           <Button 
             variant="ghost" 
             size="icon"
             onClick={onClose}
-            className="rounded-full"
+            className="rounded-full h-8 w-8"
           >
             <X className="h-4 w-4" />
           </Button>
-          <span className="font-medium text-sm">{file.name}</span>
+          <span className="font-medium text-xs md:text-sm truncate max-w-[150px] md:max-w-[250px]">{file.name}</span>
         </div>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="gap-1.5 text-sm font-normal"
-          onClick={handleDownload}
-        >
-          <Download className="h-4 w-4" />
-          Download
-        </Button>
+        
+        <div className="flex items-center gap-2">
+          {isMobileView && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 rounded-full flex items-center gap-1 text-purple-600"
+              onClick={onSwitchToChat}
+            >
+              <MessageSquare className="h-4 w-4" />
+              <span className="hidden sm:inline text-xs">Chat</span>
+            </Button>
+          )}
+          
+          <Button variant="ghost" size="sm" className="gap-1.5 text-xs md:text-sm font-normal h-8">
+            <Download className="h-3 w-3 md:h-4 md:w-4" />
+            <span className="hidden sm:inline">Download</span>
+          </Button>
+        </div>
       </div>
       
       {/* PDF Display - Full size */}
@@ -107,35 +92,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ file, onClose }) => {
           allowFullScreen={true}
         />
       </div>
-      
-      {/* Custom footer with page controls */}
-      {/* <div className="flex items-center justify-center py-2 px-4 border-t bg-white dark:bg-background">
-        <div className="flex items-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handlePrevPage}
-            disabled={currentPage <= 1}
-            className="h-8 w-8 p-0"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          
-          <div className="mx-3 text-sm">
-            Page {currentPage} of {totalPages}
-          </div>
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleNextPage}
-            disabled={currentPage >= totalPages}
-            className="h-8 w-8 p-0"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </div> */}
     </div>
   );
 };
