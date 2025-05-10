@@ -95,7 +95,7 @@ const RightSection: React.FC<RightSectionProps> = ({
       console.log('Using document ID:', documentID);
       
       // Call the ask API with document ID
-      const response = await fetch('http://localhost:3000/api/ask', {
+      const response = await fetch(`${import.meta.env.VITE_URL}/api/ask`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
