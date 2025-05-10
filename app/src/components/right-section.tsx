@@ -92,7 +92,6 @@ const RightSection: React.FC<RightSectionProps> = ({
       
       // Extract document ID from pdfData - check if it's an object with an id property or just a string
       const documentID = typeof pdfData === 'object' && pdfData.id ? pdfData.id : pdfData;
-      console.log('Using document ID:', documentID);
       
       // Call the ask API with document ID
       const response = await fetch(`${import.meta.env.VITE_URL}/api/ask`, {
@@ -145,7 +144,6 @@ const RightSection: React.FC<RightSectionProps> = ({
         );
       }
     } catch (error) {
-      console.error('Error asking question:', error);
       
       // Replace the loading message with an error message
       setMessages(prev => 
@@ -193,12 +191,7 @@ const RightSection: React.FC<RightSectionProps> = ({
     }
   }, [pdfData]);
   
-  // Log pdfData for debugging
-  useEffect(() => {
-    if (pdfData) {
-      console.log('PDF Data in right section:', pdfData);
-    }
-  }, [pdfData]);
+
 
   return (
     <section className={cn("flex flex-col bg-background", className)}>

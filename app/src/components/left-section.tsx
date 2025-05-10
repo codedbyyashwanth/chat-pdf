@@ -30,7 +30,6 @@ const LeftSection: React.FC<LeftSectionProps> = ({
   // Unified function to process PDF files from both upload methods
   const processPdfFile = async (file: File) => {
     setUploadedFile(file);
-    console.log("File uploaded:", file.name);
     
     // Clear any previous errors
     setError(null);
@@ -47,9 +46,7 @@ const LeftSection: React.FC<LeftSectionProps> = ({
       }
       
       setPdfData(result);
-      console.log("PDF processed successfully:", result);
     } catch (error) {
-      console.error("Error processing PDF:", error);
       setError(error instanceof Error ? error.message : "Failed to process PDF");
       // Set uploaded file to null since processing failed
       setUploadedFile(null);
