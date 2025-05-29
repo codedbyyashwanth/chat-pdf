@@ -2,7 +2,7 @@
 
 An interactive web application that allows users to upload, view, and have conversations with their PDF documents using AI. This application extracts text from PDFs, stores it in a vector database, and enables natural language queries against the document content.
 
-![PDF Chat Application Screenshot 1](https://i.postimg.cc/51SdfgpW/image.png)
+![PDF Chat Application Screenshot 1](https://i.postimg.cc/L8cpyFdn/screen-1.png)
 ![PDF Chat Application Screenshot 2](https://i.postimg.cc/g2XpqkTC/screen-2.png)
 
 ## Features
